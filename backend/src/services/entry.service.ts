@@ -1,6 +1,26 @@
 import { prisma } from "../index";
 
-export async function createEntry(data: {
+type TimeEntry = {
+  id: number;
+  date: Date;
+  project: string;
+  hours: number;
+  description: string;
+  createdAt: Date;
+};
+
+interface GroupedEntry {
+  date: string;
+  totalHours: number;
+  entries: {
+    id: number;
+    project: string;
+    hours: number;
+    description: string;
+  }[];
+}
+
+async function createEntry(data: {
   date: Date;
   project: string;
   hours: number;
@@ -32,3 +52,33 @@ export async function createEntry(data: {
 
   return prisma.timeEntry.create({ data });
 }
+async function getGroupedEntries() {
+  const entries: TimeEntry[] = await prisma.timeEntry.findMany({
+    orderBy: { date: "desc" },
+  });
+
+  let grandTotal = 0;
+
+  const grouped = entries.reduce<Record<string, GroupedEntry>>((acc, entry) => {
+    const dateKey = entry.date.toISOString().split("T")[0];
+    if (!acc[dateKey]) {
+      acc[dateKey] = { date: dateKey, totalHours: 0, entries: [] };
+    }
+    acc[dateKey].entries.push({
+      id: entry.id,
+      project: entry.project,
+      hours: entry.hours,
+      description: entry.description,
+    });
+    acc[dateKey].totalHours += entry.hours;
+    grandTotal += entry.hours;
+    return acc;
+  }, {});
+
+  return { grouped: Object.values(grouped), grandTotal };
+}
+
+export const entryService = {
+  create: createEntry,
+  getGroupedEntries,
+};
