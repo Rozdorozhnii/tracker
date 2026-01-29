@@ -11,7 +11,7 @@ echo "=== Installing frontend dependencies ==="
 npm install --prefix frontend
 
 echo "=== Applying Prisma migrations ==="
-npx prisma migrate deploy --schema=backend/prisma/schema.prisma
+npx prisma@5 migrate deploy --schema=backend/prisma/schema.prisma
 
 echo "=== Starting backend and frontend concurrently ==="
 npm run dev

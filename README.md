@@ -25,7 +25,7 @@ npm install
 Prisma manages the SQLite database. To create the database and apply migrations:
 
 ```
-npx prisma migrate deploy --schema=backend/prisma/schema.prisma
+npx prisma@5 migrate deploy --schema=backend/prisma/schema.prisma
 ```
 
 3. Start backend and frontend concurrently
